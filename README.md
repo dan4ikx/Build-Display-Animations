@@ -1,205 +1,187 @@
 <div align="center">
 
-# BDA
+# BDA 2.0 — More Moving
 
-### Bedrock-like Dynamic Animation
+### More detailed Minecraft character animation format
 
-Простой открытый формат анимации Minecraft-персонажей.
-
-**Версия формата: `1.0`**
-
-![Version](https://img.shields.io/badge/BDA-1.0-6d5dfc?style=for-the-badge)
-![Format](https://img.shields.io/badge/file-.bda-22c55e?style=for-the-badge)
+![Version](https://img.shields.io/badge/BDA-2.0-6d5dfc?style=for-the-badge)
+![Profile](https://img.shields.io/badge/profile-More%20Moving-22c55e?style=for-the-badge)
 ![Syntax](https://img.shields.io/badge/syntax-JSON-f59e0b?style=for-the-badge)
+
+**BDA 2.0** expands the character rig from the old simple layout to a more flexible segmented body.
 
 </div>
 
 ---
 
-## Что такое BDA?
+## Что нового в BDA 2.0
 
-**BDA (`.bda`)** — простой JSON-формат для хранения анимации Minecraft-персонажей.
+BDA 2.0 **More Moving** даёт более детальную анимацию частей тела.
 
-BDA 1.0 предназначен для описания анимации Minecraft-персонажей:
+### Новый набор костей
 
-- один или несколько персонажей;
-- единая временная шкала;
-- ключевые точки по времени;
-- вращение и локальное смещение костей;
-- при необходимости — положение и вращение персонажа в пространстве;
-- простая интерполяция.
+Теперь персонаж использует **11 костей**:
 
----
+| Группа | Кости | Кол-во |
+|---|---|---:|
+| Голова | `head` | 1 |
+| Туловище | `chest`, `torso` | 2 |
+| Левая рука | `left_shoulder`, `left_arm` | 2 |
+| Правая рука | `right_shoulder`, `right_arm` | 2 |
+| Левая нога | `left_leg_upper`, `left_leg_lower` | 2 |
+| Правая нога | `right_leg_upper`, `right_leg_lower` | 2 |
 
-## Шесть костей
-
-Каждый персонаж имеет ровно эти 6 костей:
-
-| Кость | Часть |
-|---|---|
-| `head` | голова |
-| `body` | туловище |
-| `left_arm` | левая рука |
-| `right_arm` | правая рука |
-| `left_leg` | левая нога |
-| `right_leg` | правая нога |
+Итого: **11 костей**.
 
 ---
 
-## Минимальный пример
+## Схема тела по рисунку
+
+Ниже — обработанный референс на основе присланного изображения:
+
+![BDA 2.0 bone map](docs/images/bda_2_bone_map.png)
+
+Цветовая логика из рисунка:
+
+- **Голова** — бежевый блок;
+- **Плечи** — синие блоки;
+- **Руки** — оранжевые блоки;
+- **Грудь** — зелёный блок;
+- **Туловище** — голубой блок;
+- **Верх ног** — красный блок;
+- **Низ ног** — розовый блок.
+
+---
+
+## Минимальная структура файла
 
 ```json
 {
   "format": "bda",
-  "version": "1.0",
+  "version": "2.0",
+  "profile": "more_moving",
   "animation": {
-    "name": "wave",
-    "duration": 2.0,
-    "characters": [
-      {
-        "id": "player",
-        "bones": {
-          "head": {},
-          "body": {},
-          "left_arm": {},
-          "right_arm": {
-            "rotation": {
-              "0.0": [0, 0, 0],
-              "0.5": [-130, 0, 10],
-              "1.0": [-130, 0, -10],
-              "1.5": [-130, 0, 10],
-              "2.0": [0, 0, 0]
-            }
-          },
-          "left_leg": {},
-          "right_leg": {}
-        }
-      }
-    ]
+    "name": "example",
+    "duration": 3.0,
+    "fps": 20,
+    "loop": false,
+    "characters": []
   }
 }
 ```
 
 ---
 
-## Положение персонажа в пространстве
-
-`space` полностью необязателен:
+## Один персонаж
 
 ```json
-"space": {
-  "position": {
-    "0.0": [-2.0, 0.0, 0.0],
-    "2.0": [-0.8, 0.0, 0.0]
+{
+  "id": "player_1",
+  "space": {
+    "position": {
+      "0.0": [0, 0, 0]
+    },
+    "rotation": {
+      "0.0": [0, 180, 0]
+    }
   },
+  "bones": {
+    "head": {},
+    "chest": {},
+    "torso": {},
+    "left_shoulder": {},
+    "left_arm": {},
+    "right_shoulder": {},
+    "right_arm": {},
+    "left_leg_upper": {},
+    "left_leg_lower": {},
+    "right_leg_upper": {},
+    "right_leg_lower": {}
+  }
+}
+```
+
+---
+
+## Пример keyframes
+
+```json
+"right_arm": {
   "rotation": {
-    "0.0": [0.0, 90.0, 0.0]
+    "0.0": [0, 0, 0],
+    "0.6": {
+      "value": [-35, -10, -5],
+      "easing": "ease_out"
+    },
+    "1.4": {
+      "value": [-75, -18, -8],
+      "easing": "ease_in_out"
+    },
+    "2.0": [0, 0, 0]
   }
 }
 ```
 
-Форматы:
+---
+
+## Иерархия костей
+
+BDA 2.0 использует фиксированную иерархию:
 
 ```text
-position = [x, y, z]
-rotation = [pitch, yaw, roll]
+torso
+├── chest
+│   ├── head
+│   ├── left_shoulder
+│   │   └── left_arm
+│   └── right_shoulder
+│       └── right_arm
+├── left_leg_upper
+│   └── left_leg_lower
+└── right_leg_upper
+    └── right_leg_lower
 ```
 
-Позиция задаётся в Minecraft-блоках, вращение — в градусах.
+Эта схема делает движения естественнее:
 
-Если `space` отсутствует, runtime не должен менять положение сущности в мире.
+- поворот `torso` переносит верхнюю часть тела;
+- `chest` позволяет отдельно работать с верхом корпуса;
+- плечи и руки можно двигать независимо;
+- верх и низ ног можно анимировать раздельно.
 
 ---
 
-## Keyframes
-
-Простая форма:
-
-```json
-"1.0": [0, 45, 0]
-```
-
-Расширенная:
-
-```json
-"1.0": {
-  "value": [0, 45, 0],
-  "easing": "ease_in_out"
-}
-```
-
-Поддерживаемые easing:
-
-- `linear`
-- `step`
-- `smoothstep`
-- `ease_in`
-- `ease_out`
-- `ease_in_out`
-
----
-
-## Несколько персонажей
-
-```json
-"characters": [
-  {
-    "id": "alice",
-    "bones": {
-      "head": {},
-      "body": {},
-      "left_arm": {},
-      "right_arm": {},
-      "left_leg": {},
-      "right_leg": {}
-    }
-  },
-  {
-    "id": "bob",
-    "bones": {
-      "head": {},
-      "body": {},
-      "left_arm": {},
-      "right_arm": {},
-      "left_leg": {},
-      "right_leg": {}
-    }
-  }
-]
-```
-
-Все персонажи используют одну timeline, поэтому их движения легко синхронизировать.
-
----
-
-## Структура репозитория
+## Что лежит в репозитории
 
 ```text
-BDA-1.0/
+BDA-2.0-More-Moving/
 ├── README.md
 ├── animation.md
+├── docs/
+│   └── images/
+│       └── bda_2_bone_map.png
 ├── examples/
 │   └── Hello.bda
 └── schema/
     └── bda.schema.json
 ```
 
-`Hello.bda` демонстрирует, как два персонажа подходят друг к другу и пожимают правые руки.
+---
+
+## Hello.bda
+
+`examples/Hello.bda` демонстрирует анимацию двух персонажей:
+
+1. они идут навстречу друг другу;
+2. сгибают верхнюю и нижнюю части ног;
+3. отдельно поворачивают `chest` и `torso`;
+4. поднимают плечи;
+5. протягивают руки;
+6. делают несколько движений рукопожатия;
+7. возвращаются в нейтральную позу.
 
 ---
 
-## Основной принцип
+## Ключевая идея BDA 2.0
 
-BDA должен оставаться настолько простым, чтобы небольшую анимацию можно было написать вручную:
-
-```json
-"head": {
-  "rotation": {
-    "0.0": [0, 0, 0],
-    "1.0": [0, 30, 0],
-    "2.0": [0, 0, 0]
-  }
-}
-```
-
-**BDA 1.0 = персонажи + 6 костей + keyframes + необязательное движение в пространстве.**
+**BDA 2.0 More Moving** сохраняет простоту JSON-формата, но даёт больше контроля над телом персонажа за счёт разделения крупных частей на дополнительные кости.

@@ -1,11 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "BDA 1.0",
+  "title": "BDA 2.0 More Moving",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "format",
     "version",
+    "profile",
     "animation"
   ],
   "properties": {
@@ -13,7 +14,10 @@
       "const": "bda"
     },
     "version": {
-      "const": "1.0"
+      "const": "2.0"
+    },
+    "profile": {
+      "const": "more_moving"
     },
     "animation": {
       "type": "object",
@@ -80,8 +84,17 @@
                 "smoothstep",
                 "ease_in",
                 "ease_out",
-                "ease_in_out"
+                "ease_in_out",
+                "bezier"
               ]
+            },
+            "bezier": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 4,
+              "maxItems": 4
             }
           }
         }
@@ -90,7 +103,7 @@
     "track": {
       "type": "object",
       "patternProperties": {
-        "^(0|[1-9]\\\\d*)(\\\\.\\\\d+)?$": {
+        "^(0|[1-9]\\d*)(\\.\\d+)?$": {
           "$ref": "#/$defs/keyframe"
         }
       },
@@ -108,38 +121,6 @@
         }
       }
     },
-    "bones": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "head",
-        "body",
-        "left_arm",
-        "right_arm",
-        "left_leg",
-        "right_leg"
-      ],
-      "properties": {
-        "head": {
-          "$ref": "#/$defs/bone"
-        },
-        "body": {
-          "$ref": "#/$defs/bone"
-        },
-        "left_arm": {
-          "$ref": "#/$defs/bone"
-        },
-        "right_arm": {
-          "$ref": "#/$defs/bone"
-        },
-        "left_leg": {
-          "$ref": "#/$defs/bone"
-        },
-        "right_leg": {
-          "$ref": "#/$defs/bone"
-        }
-      }
-    },
     "space": {
       "type": "object",
       "additionalProperties": false,
@@ -149,6 +130,58 @@
         },
         "rotation": {
           "$ref": "#/$defs/track"
+        }
+      }
+    },
+    "bones": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "head",
+        "chest",
+        "torso",
+        "left_shoulder",
+        "left_arm",
+        "right_shoulder",
+        "right_arm",
+        "left_leg_upper",
+        "left_leg_lower",
+        "right_leg_upper",
+        "right_leg_lower"
+      ],
+      "properties": {
+        "head": {
+          "$ref": "#/$defs/bone"
+        },
+        "chest": {
+          "$ref": "#/$defs/bone"
+        },
+        "torso": {
+          "$ref": "#/$defs/bone"
+        },
+        "left_shoulder": {
+          "$ref": "#/$defs/bone"
+        },
+        "left_arm": {
+          "$ref": "#/$defs/bone"
+        },
+        "right_shoulder": {
+          "$ref": "#/$defs/bone"
+        },
+        "right_arm": {
+          "$ref": "#/$defs/bone"
+        },
+        "left_leg_upper": {
+          "$ref": "#/$defs/bone"
+        },
+        "left_leg_lower": {
+          "$ref": "#/$defs/bone"
+        },
+        "right_leg_upper": {
+          "$ref": "#/$defs/bone"
+        },
+        "right_leg_lower": {
+          "$ref": "#/$defs/bone"
         }
       }
     },
