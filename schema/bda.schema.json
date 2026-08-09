@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BDA 1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "animation"
+  ],
+  "properties": {
+    "format": {
+      "const": "bda"
+    },
+    "version": {
+      "const": "1.0"
+    },
+    "animation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "duration",
+        "characters"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "duration": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fps": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "loop": {
+          "type": "boolean"
+        },
+        "characters": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/character"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "keyframe": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/vec3"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/vec3"
+            },
+            "easing": {
+              "enum": [
+                "linear",
+                "step",
+                "smoothstep",
+                "ease_in",
+                "ease_out",
+                "ease_in_out"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "track": {
+      "type": "object",
+      "patternProperties": {
+        "^(0|[1-9]\\\\d*)(\\\\.\\\\d+)?$": {
+          "$ref": "#/$defs/keyframe"
+        }
+      },
+      "additionalProperties": false
+    },
+    "bone": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rotation": {
+          "$ref": "#/$defs/track"
+        },
+        "position": {
+          "$ref": "#/$defs/track"
+        }
+      }
+    },
+    "bones": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "head",
+        "body",
+        "left_arm",
+        "right_arm",
+        "left_leg",
+        "right_leg"
+      ],
+      "properties": {
+        "head": {
+          "$ref": "#/$defs/bone"
+        },
+        "body": {
+          "$ref": "#/$defs/bone"
+        },
+        "left_arm": {
+          "$ref": "#/$defs/bone"
+        },
+        "right_arm": {
+          "$ref": "#/$defs/bone"
+        },
+        "left_leg": {
+          "$ref": "#/$defs/bone"
+        },
+        "right_leg": {
+          "$ref": "#/$defs/bone"
+        }
+      }
+    },
+    "space": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/track"
+        },
+        "rotation": {
+          "$ref": "#/$defs/track"
+        }
+      }
+    },
+    "character": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "bones"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "space": {
+          "$ref": "#/$defs/space"
+        },
+        "bones": {
+          "$ref": "#/$defs/bones"
+        }
+      }
+    }
+  }
+}

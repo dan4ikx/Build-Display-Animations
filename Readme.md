@@ -1,19 +1,16 @@
 <div align="center">
 
-# ✦ BDA
+# BDA
 
-### Block Dynamic Animation
+### Bedrock-like Dynamic Animation
 
-**Открытый формат сценических и скелетных анимаций для Minecraft**
+Простой открытый формат анимации Minecraft-персонажей.
 
-[![Format](https://img.shields.io/badge/format-.bda-7c5cff?style=for-the-badge)](#)
-[![Version](https://img.shields.io/badge/spec-1.0.0-38bdf8?style=for-the-badge)](#)
-[![Encoding](https://img.shields.io/badge/encoding-UTF--8-22c55e?style=for-the-badge)](#)
-[![Syntax](https://img.shields.io/badge/syntax-JSON-f59e0b?style=for-the-badge)](#)
+**Версия формата: `1.0`**
 
-**Bedrock-подобные keyframe-анимации, но для целых сцен.**
-
-Несколько персонажей · единая временная шкала · кости · root motion · события · предметы · constraints · камера
+![Version](https://img.shields.io/badge/BDA-1.0-6d5dfc?style=for-the-badge)
+![Format](https://img.shields.io/badge/file-.bda-22c55e?style=for-the-badge)
+![Syntax](https://img.shields.io/badge/syntax-JSON-f59e0b?style=for-the-badge)
 
 </div>
 
@@ -21,357 +18,188 @@
 
 ## Что такое BDA?
 
-**BDA (`.bda`)** — человекочитаемый формат анимации, созданный для Minecraft.
+**BDA (`.bda`)** — простой JSON-формат для хранения анимации Minecraft-персонажей.
 
-По духу он похож на Bedrock Animation JSON: движение задаётся через **кости, ключевые точки и координаты**.  
-Но BDA проектируется не вокруг одной модели, а вокруг **полноценной сцены**.
+BDA 1.0 предназначен для описания анимации Minecraft-персонажей:
 
-Один файл может содержать:
-
-- 👥 несколько персонажей;
-- 🦴 несколько скелетов / rig;
-- 🎞 несколько animation clips;
-- 📍 перемещение персонажей по сцене;
-- 🔄 вращение, позицию и масштаб костей;
-- 🤝 синхронные взаимодействия между персонажами;
-- 🔊 звуки;
-- ✨ частицы;
-- ⚡ события;
-- 🗡 предметы в руках;
-- 🎥 камеры;
-- 🎭 слои анимации;
-- 👀 `look_at`;
-- 🦾 IK и другие constraints;
-- 🧩 расширения от модов и плагинов.
+- один или несколько персонажей;
+- единая временная шкала;
+- ключевые точки по времени;
+- вращение и локальное смещение костей;
+- при необходимости — положение и вращение персонажа в пространстве;
+- простая интерполяция.
 
 ---
 
-## Почему `.bda`?
+## Шесть костей
 
-Стандартные Minecraft-анимации хорошо подходят для анимации одной модели, но становятся неудобными, когда необходимо описать:
+Каждый персонаж имеет ровно эти 6 костей:
 
-> «Персонаж A подходит к персонажу B, они смотрят друг на друга, одновременно протягивают руки, пожимают их, проигрывается звук, а затем оба возвращаются в исходное положение».
-
-В BDA это одна сцена и одна временная шкала.
-
-```text
-0.0s      1.0s      2.0s      3.0s      4.0s      5.0s
-│----------│----------│----------│----------│----------│
-A   идёт ───────────▶  протягивает руку ──┐
-                                           ├─ handshake
-B   идёт ───────────▶  протягивает руку ──┘
-```
+| Кость | Часть |
+|---|---|
+| `head` | голова |
+| `body` | туловище |
+| `left_arm` | левая рука |
+| `right_arm` | правая рука |
+| `left_leg` | левая нога |
+| `right_leg` | правая нога |
 
 ---
 
-## Минимальный BDA
+## Минимальный пример
 
 ```json
 {
   "format": "bda",
-  "bda_version": "1.0.0",
-
-  "meta": {
-    "name": "hello",
-    "duration": 5.0,
-    "fps": 20
-  },
-
-  "actors": {
-    "player": {
-      "type": "minecraft:player",
-      "rig": "minecraft:humanoid"
-    }
-  },
-
-  "clips": {
-    "main": {
-      "duration": 5.0,
-      "actors": {
-        "player": {
-          "head": {
+  "version": "1.0",
+  "animation": {
+    "name": "wave",
+    "duration": 2.0,
+    "characters": [
+      {
+        "id": "player",
+        "bones": {
+          "head": {},
+          "body": {},
+          "left_arm": {},
+          "right_arm": {
             "rotation": {
               "0.0": [0, 0, 0],
-              "2.0": [0, 35, 0],
-              "5.0": [0, 0, 0]
+              "0.5": [-130, 0, 10],
+              "1.0": [-130, 0, -10],
+              "1.5": [-130, 0, 10],
+              "2.0": [0, 0, 0]
             }
-          }
+          },
+          "left_leg": {},
+          "right_leg": {}
         }
       }
-    }
-  },
-
-  "playback": {
-    "entry": "main"
+    ]
   }
 }
 ```
 
 ---
 
-## Keyframes
+## Положение персонажа в пространстве
 
-Простая запись:
+`space` полностью необязателен:
 
 ```json
-"rotation": {
-  "0.0": [0, 0, 0],
-  "1.0": [0, 45, 0],
-  "2.0": [0, 0, 0]
+"space": {
+  "position": {
+    "0.0": [-2.0, 0.0, 0.0],
+    "2.0": [-0.8, 0.0, 0.0]
+  },
+  "rotation": {
+    "0.0": [0.0, 90.0, 0.0]
+  }
 }
 ```
 
-Расширенная запись:
+Форматы:
+
+```text
+position = [x, y, z]
+rotation = [pitch, yaw, roll]
+```
+
+Позиция задаётся в Minecraft-блоках, вращение — в градусах.
+
+Если `space` отсутствует, runtime не должен менять положение сущности в мире.
+
+---
+
+## Keyframes
+
+Простая форма:
+
+```json
+"1.0": [0, 45, 0]
+```
+
+Расширенная:
 
 ```json
 "1.0": {
   "value": [0, 45, 0],
-  "easing": "bezier",
-  "bezier": [0.25, 0.1, 0.25, 1.0]
+  "easing": "ease_in_out"
 }
 ```
 
-BDA 1.0 предусматривает:
+Поддерживаемые easing:
 
-```text
-linear
-step
-smoothstep
-ease_in
-ease_out
-ease_in_out
-bezier
-```
+- `linear`
+- `step`
+- `smoothstep`
+- `ease_in`
+- `ease_out`
+- `ease_in_out`
 
 ---
 
 ## Несколько персонажей
 
 ```json
-"actors": {
-  "alice": {
-    "type": "minecraft:player",
-    "rig": "minecraft:humanoid"
-  },
-
-  "bob": {
-    "type": "minecraft:player",
-    "rig": "minecraft:humanoid"
-  }
-}
-```
-
-Они существуют на **одной timeline**, поэтому взаимодействия остаются синхронными.
-
----
-
-## События
-
-```json
-"events": [
+"characters": [
   {
-    "time": 2.75,
-    "type": "marker",
-    "name": "handshake_contact"
+    "id": "alice",
+    "bones": {
+      "head": {},
+      "body": {},
+      "left_arm": {},
+      "right_arm": {},
+      "left_leg": {},
+      "right_leg": {}
+    }
   },
-
   {
-    "time": 2.75,
-    "type": "sound",
-    "sound": "minecraft:entity.player.attack.nodamage",
-    "position": {
-      "between": ["alice", "bob"]
+    "id": "bob",
+    "bones": {
+      "head": {},
+      "body": {},
+      "left_arm": {},
+      "right_arm": {},
+      "left_leg": {},
+      "right_leg": {}
     }
   }
 ]
 ```
 
-Runtime может использовать marker для своей логики:
-
-```text
-handshake_contact
-attack_hit
-left_foot_down
-door_open
-dialogue_02
-camera_cut
-```
-
----
-
-## Координаты
-
-Позиция:
-
-```text
-[x, y, z]
-```
-
-Вращение:
-
-```text
-[pitch, yaw, roll]
-```
-
-Масштаб:
-
-```text
-[x, y, z]
-```
-
-По умолчанию:
-
-| Значение | Единица |
-|---|---|
-| Position | Minecraft block |
-| Rotation | degrees |
-| Time | seconds |
-| Scale | multiplier |
+Все персонажи используют одну timeline, поэтому их движения легко синхронизировать.
 
 ---
 
 ## Структура репозитория
 
 ```text
-BDA/
+BDA-1.0/
 ├── README.md
 ├── animation.md
 ├── examples/
 │   └── Hello.bda
-├── schema/
-│   └── bda.schema.json
-├── runtime/
-│   ├── parser/
-│   ├── evaluator/
-│   ├── interpolation/
-│   ├── constraints/
-│   └── minecraft/
-└── tools/
-    ├── validator/
-    └── converter/
+└── schema/
+    └── bda.schema.json
 ```
 
----
-
-## Пример: рукопожатие
-
-В репозитории рекомендуется хранить `examples/Hello.bda`.
-
-Сцена демонстрирует:
-
-1. два независимых actor;
-2. движение обоих персонажей;
-3. повороты корпуса;
-4. движение головы;
-5. синхронную анимацию правых рук;
-6. контакт рук;
-7. небольшое движение рукопожатия;
-8. events и markers;
-9. easing;
-10. возврат в idle.
+`Hello.bda` демонстрирует, как два персонажа подходят друг к другу и пожимают правые руки.
 
 ---
 
-## Как должен работать BDA Runtime
+## Основной принцип
 
-```text
-              ┌───────────────┐
-              │    .bda file  │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │     Parser    │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │   Validator   │
-              └───────┬───────┘
-                      │
-                      ▼
-              ┌───────────────┐
-              │ Rig Resolver  │
-              └───────┬───────┘
-                      │
-                      ▼
-        ┌─────────────────────────────┐
-        │     Timeline Evaluator      │
-        └──────────────┬──────────────┘
-                       │
-          ┌────────────┼─────────────┐
-          ▼            ▼             ▼
-   Interpolation   Constraints     Events
-          │            │             │
-          └────────────┼─────────────┘
-                       ▼
-              ┌─────────────────┐
-              │ Minecraft Layer │
-              └─────────────────┘
+BDA должен оставаться настолько простым, чтобы небольшую анимацию можно было написать вручную:
+
+```json
+"head": {
+  "rotation": {
+    "0.0": [0, 0, 0],
+    "1.0": [0, 30, 0],
+    "2.0": [0, 0, 0]
+  }
+}
 ```
 
----
-
-## Цели проекта
-
-BDA задуман как формат, который можно использовать в:
-
-- Paper / Spigot;
-- Fabric;
-- NeoForge;
-- серверных NPC-системах;
-- Blockbench-плагинах;
-- кат-сценах;
-- machinima;
-- квестовых системах;
-- RPG-серверах;
-- Minecraft-картах;
-- собственных движках рендера.
-
----
-
-## Принципы BDA
-
-### Human-readable
-
-Файл можно открыть обычным редактором.
-
-### Deterministic
-
-Одна и та же timeline должна давать одинаковый результат при одинаковых входных условиях.
-
-### Extensible
-
-Неизвестные необязательные поля minor-версий могут игнорироваться runtime.
-
-### Safe by default
-
-`.bda` не является исполняемым кодом.
-
-### Scene-first
-
-Персонажи, события и объекты синхронизируются одной временной шкалой.
-
----
-
-## Статус
-
-> **BDA 1.0 — experimental specification.**
-
-Формат уже пригоден для создания parser/runtime prototype, но до появления стабильного runtime некоторые поля могут уточняться.
-
----
-
-## Лицензирование
-
-Для самого формата рекомендуется использовать **MIT** или **Apache-2.0**, чтобы BDA было легко внедрять в моды, плагины, редакторы и коммерческие Minecraft-проекты.
-
----
-
-<div align="center">
-
-### ✦ BDA
-
-**Animate characters. Build scenes. Keep it readable.**
-
-</div>
+**BDA 1.0 = персонажи + 6 костей + keyframes + необязательное движение в пространстве.**
